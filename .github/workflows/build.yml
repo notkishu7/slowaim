@@ -1,19 +1,38 @@
-name: build
-on: [push, workflow_dispatch]
+
+name: Build Slow Aim Mod
+
+on:
+  workflow_dispatch:
+
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v5
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Java 21
+        uses: actions/setup-java@v5
         with:
-          java-version: 21
           distribution: temurin
-      - uses: gradle/actions/setup-gradle@v4
+          java-version: '21'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: 9.2.0
-      - run: gradle build
-      - uses: actions/upload-artifact@v4
+          gradle-version: 'current'
+
+      - name: Extract project
+        run: |
+          unzip slowaim-fabric-1.21.11.zip -d source
+
+      - name: Build Minecraft mod
+        run: gradle -p source/slowaim build
+
+      - name: Upload JAR
+        uses: actions/upload-artifact@v4
         with:
-          name: slowaim-jar
-          path: build/libs/*.jar
+          name: SlowAim-Mod
+          path: source/slowaim/build/libs/*.jar
+          if-no-files-found: error
